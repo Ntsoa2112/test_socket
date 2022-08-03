@@ -1,0 +1,74 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.8/dist/vue.js"></script>
+</head>
+<body>
+  <div id="v-app">
+    <h1>{{ title }}</h1>
+    <form>
+      <input v-model="text" type="text">
+      <button type="submit" @click.prevent="sendMessage()">Send</button>
+    </form>
+    <p>
+      <ul>
+        <li v-for="msg of messages">{{ msg }}</li>
+      </ul>
+    </p>
+  </div>
+  <script>
+    var app = new Vue({
+      el: '#v-app',
+      data: {
+        title: 'Socket IO',
+        text: '',
+        messages: ['Some message', 'Another message'],
+        socket: null
+      },
+      methods: {
+        sendMessage() {
+          console.log(`Send : ${this.text}`);
+          this.socket.emit('msgToServer', this.text);
+          this.text = "";
+        },
+
+        receiveMessage(msg){
+          console.log(`Receive : ${msg}`);
+          this.messages.push(msg);
+        },
+      },
+      created(){
+        this.socket = io('http://localhost:3000/');
+        this.socket.on('msgToClient', (msg) => {
+          this.receiveMessage(msg);
+        });
+        this.socket.on('eventCheckedChecklist', (data) => {
+          console.log(data);
+        });
+        this.socket.on('eventLabelFinished', (data) => {
+          console.log('eventLabelFinished : ' + data);
+        })
+        this.socket.on('eventChecklistRefaire', (data) => {
+          console.log(data);
+        })
+        this.socket.on('eventRetardLabel', (data) => {
+          console.log("EN RETARD :");
+          console.log(data);
+        })
+        this.socket.on('eventTest', (data) => {
+          console.log("Websocket event : eventTest");
+          console.log(data);
+        })
+        this.socket.on('mybroadcast', (data) => {
+          console.log('EVENT : mybroadcast');
+          console.log(data);
+        })
+      }
+    })
+  </script>
+</body>
+</html>
